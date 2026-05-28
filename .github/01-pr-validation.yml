@@ -1,0 +1,55 @@
+name: PR Validation
+
+# ============================================================
+# Trigger: Mọi PR tạo vào nhánh main
+# Mục đích: Kiểm tra code quality, lint, build trước khi merge
+# ============================================================
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------------------------------------
+  # JOB 1: Validate thông tin PR
+  # ----------------------------------------------------------
+  validate-pr:
+    name: Validate PR Info
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check PR title convention
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            hotfix
+            docs
+            style
+            refactor
+            perf
+            test
+            chore
+            ci
+          requireScope: false
+
+      - name: Check branch naming convention
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Branch: $BRANCH"
+
+          # Cho phép: feature/*, hotfix/*, fix/*,
+          if [[ ! "$BRANCH" =~ ^(feature|hotfix|fix)/.+ ]]; then
+            echo " Branch name '$BRANCH' không đúng convention!"
+            echo " Đúng format: feature/ten-tinh-nang, hotfix/ten-bug, fix/mo-ta..."
+            exit 1
+          fi
+
+          echo " Branch name hợp lệ: $BRANCH"
