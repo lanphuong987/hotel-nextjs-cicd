@@ -1,0 +1,70 @@
+export const siteConfig = {
+  hotelName: "Change Hotel",
+  tagline: "Stay where the city changes pace",
+  description:
+    "A refined boutique hotel for guests who want quiet luxury, thoughtful service, and easy access to the best corners of the city.",
+  heroImage:
+    "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1800&q=85",
+  bookingCta: "Reserve a suite",
+  secondaryCta: "Explore rooms",
+  contact: {
+    phone: "+84 28 5555 2026",
+    email: "hello@changehotel.example",
+    address: "18 Riverside Avenue, District One"
+  },
+  highlights: [
+    {
+      label: "Signature Suites",
+      value: "42",
+      detail: "private balconies and skyline views"
+    },
+    {
+      label: "Guest Rating",
+      value: "4.9",
+      detail: "from curated hospitality reviews"
+    },
+    {
+      label: "Concierge",
+      value: "24h",
+      detail: "for dining, transfers, and city experiences"
+    }
+  ],
+  rooms: [
+    {
+      name: "Atrium King",
+      price: "from $180",
+      image:
+        "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80",
+      description: "Warm walnut details, marble bath, and a calm work corner."
+    },
+    {
+      name: "Riverside Suite",
+      price: "from $310",
+      image:
+        "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
+      description: "A separate lounge, deep soaking tub, and open water views."
+    },
+    {
+      name: "Change Penthouse",
+      price: "from $620",
+      image:
+        "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1200&q=80",
+      description: "Top-floor privacy with dining space and dedicated host service."
+    }
+  ],
+  amenities: [
+    "Rooftop pool",
+    "Chef-led breakfast",
+    "Wellness studio",
+    "Airport transfer",
+    "Private dining",
+    "Late checkout"
+  ],
+  gallery: [
+    "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1000&q=80",
+    "https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&w=1000&q=80"
+  ]
+};
+
+export type SiteConfig = typeof siteConfig;

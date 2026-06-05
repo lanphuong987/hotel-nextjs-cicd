@@ -1,0 +1,22 @@
+# docker-compose.dev.yml — Development Environment
+version: '3.8'
+
+services:
+  hotel-app:
+    image: ${DOCKER_USERNAME}/${IMAGE_NAME}:dev-latest
+    container_name: hotel-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BUILD_ENV=development
+    env_file:
+      - .env.development
+    labels:
+      - "com.hotel.environment=development"
+      - "com.hotel.managed-by=docker-compose"
+
+networks:
+  default:
+    name: hotel-dev-network

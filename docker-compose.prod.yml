@@ -1,0 +1,28 @@
+# docker-compose.prod.yml — Production Environment
+version: '3.8'
+
+services:
+  hotel-app:
+    image: ${DOCKER_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG:-latest}
+    container_name: hotel-prod
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - BUILD_ENV=production
+    env_file:
+      - .env.production
+    labels:
+      - "com.hotel.environment=production"
+      - "com.hotel.managed-by=docker-compose"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  default:
+    name: hotel-prod-network
