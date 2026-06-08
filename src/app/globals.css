@@ -305,6 +305,234 @@ h3 {
   gap: 10px;
 }
 
+.adminPage {
+  background: #f4f1ea;
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 34px 24px 56px;
+}
+
+.adminHeader,
+.adminForm {
+  margin: 0 auto;
+  max-width: 1120px;
+}
+
+.adminHeader {
+  align-items: center;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  padding-bottom: 26px;
+}
+
+.adminHeaderActions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.adminUser {
+  color: var(--muted);
+  font-weight: 700;
+  margin: 10px 0 0;
+}
+
+.adminLoginPage {
+  align-items: center;
+  background: #f4f1ea;
+  display: grid;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.adminLoginCard {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  margin: 0 auto;
+  max-width: 440px;
+  padding: 28px;
+  width: 100%;
+}
+
+.adminLoginCard h1 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.3rem, 7vw, 4rem);
+  line-height: 1.05;
+}
+
+.adminHeader h1,
+.adminSection h2 {
+  font-family: var(--font-display), Georgia, serif;
+  line-height: 1.05;
+}
+
+.adminHeader h1 {
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+}
+
+.adminLink,
+.adminPrimaryButton,
+.adminSecondaryButton,
+.adminDangerButton {
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 44px;
+  padding: 11px 16px;
+}
+
+.adminLink,
+.adminSecondaryButton {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.adminPrimaryButton {
+  background: var(--deep);
+  border: 1px solid var(--deep);
+  color: var(--ivory);
+}
+
+.adminPrimaryButton:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.adminDangerButton {
+  background: transparent;
+  border: 1px solid rgba(95, 38, 50, 0.36);
+  color: var(--wine);
+}
+
+.adminForm {
+  display: grid;
+  gap: 18px;
+}
+
+.adminSection {
+  background: var(--ivory);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.adminSectionHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.adminSectionHeader h2 {
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+}
+
+.adminSectionHeader p {
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 8px 0 0;
+  max-width: 580px;
+}
+
+.adminGrid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.adminField {
+  display: grid;
+  gap: 8px;
+}
+
+.adminField span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.adminField input,
+.adminField textarea {
+  background: #fffefa;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.5;
+  min-width: 0;
+  padding: 12px 13px;
+  width: 100%;
+}
+
+.adminField textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.adminList {
+  display: grid;
+  gap: 14px;
+}
+
+.adminList.compact {
+  gap: 10px;
+}
+
+.adminItem,
+.adminInlineItem {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 14px;
+  padding-top: 16px;
+}
+
+.adminInlineItem {
+  align-items: end;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.adminSaveBar {
+  align-items: center;
+  background: rgba(244, 241, 234, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 14px;
+  position: sticky;
+}
+
+.adminStatus {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.adminStatus.error {
+  color: var(--wine);
+  font-weight: 800;
+}
+
+.adminStatus.saved {
+  color: var(--deep);
+  font-weight: 800;
+}
+
 @media (max-width: 820px) {
   .nav {
     align-items: flex-start;
@@ -341,5 +569,29 @@ h3 {
 
   .amenities ul {
     grid-template-columns: 1fr;
+  }
+
+  .adminPage {
+    padding: 24px 14px 48px;
+  }
+
+  .adminHeader,
+  .adminSectionHeader,
+  .adminInlineItem {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .adminHeader,
+  .adminSectionHeader {
+    flex-direction: column;
+  }
+
+  .adminHeaderActions {
+    justify-content: stretch;
+  }
+
+  .adminSection {
+    padding: 18px;
   }
 }

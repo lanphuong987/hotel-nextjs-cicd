@@ -14,14 +14,14 @@ export function LandingPage({ config }: LandingPageProps) {
             {config.hotelName}
           </a>
           <div className="navLinks">
-            <a href="#rooms">Rooms</a>
-            <a href="#amenities">Amenities</a>
-            <a href="#contact">Contact</a>
+            <a href="#rooms">{config.navigation.rooms}</a>
+            <a href="#amenities">{config.navigation.amenities}</a>
+            <a href="#contact">{config.navigation.contact}</a>
           </div>
         </nav>
 
         <div className="heroOverlay" id="top">
-          <p className="eyebrow">Boutique luxury hotel</p>
+          <p className="eyebrow">{config.heroEyebrow}</p>
           <h1>{config.hotelName}</h1>
           <p className="tagline">{config.tagline}</p>
           <p className="heroCopy">{config.description}</p>
@@ -48,19 +48,16 @@ export function LandingPage({ config }: LandingPageProps) {
 
       <section className="section intro">
         <div>
-          <p className="eyebrow">A quieter kind of grand</p>
-          <h2>Made for slow mornings, polished evenings, and stays that feel personal.</h2>
+          <p className="eyebrow">{config.intro.eyebrow}</p>
+          <h2>{config.intro.title}</h2>
         </div>
-        <p>
-          Change Hotel blends residential calm with precise service: layered textures,
-          warm lighting, curated dining, and a team that remembers the small details.
-        </p>
+        <p>{config.intro.copy}</p>
       </section>
 
       <section className="section rooms" id="rooms">
         <div className="sectionHeader">
-          <p className="eyebrow">Rooms and suites</p>
-          <h2>Choose your pace</h2>
+          <p className="eyebrow">{config.roomsSection.eyebrow}</p>
+          <h2>{config.roomsSection.title}</h2>
         </div>
         <div className="roomGrid">
           {config.rooms.map((room) => (
@@ -85,8 +82,8 @@ export function LandingPage({ config }: LandingPageProps) {
 
       <section className="amenities" id="amenities">
         <div>
-          <p className="eyebrow">Included comforts</p>
-          <h2>Everything close, nothing rushed.</h2>
+          <p className="eyebrow">{config.amenitiesSection.eyebrow}</p>
+          <h2>{config.amenitiesSection.title}</h2>
         </div>
         <ul>
           {config.amenities.map((amenity) => (
@@ -109,8 +106,8 @@ export function LandingPage({ config }: LandingPageProps) {
 
       <section className="contact" id="contact">
         <div>
-          <p className="eyebrow">Plan your stay</p>
-          <h2>Arrive easy. Leave changed.</h2>
+          <p className="eyebrow">{config.contactSection.eyebrow}</p>
+          <h2>{config.contactSection.title}</h2>
         </div>
         <address>
           <span>{config.contact.address}</span>

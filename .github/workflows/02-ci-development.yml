@@ -1,0 +1,22 @@
+name: 🚀 CI — Deploy to Development
+ 
+# ============================================================
+# Trigger: Khi PR được merge vào nhánh main
+# GitHub Environment sử dụng: development
+# Mục đích: Build Docker image với secret của DEV, deploy lên
+#           server để đội Dev/QA test trước khi release production
+# ============================================================
+on:
+  push:
+    branches:
+      - main
+
+env:
+  IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+ 
+jobs:
+  # ----------------------------------------------------------
+  # JOB 1: Build và Push Docker Image (dùng secret của development)
+  # ----------------------------------------------------------
+  build-and-push:

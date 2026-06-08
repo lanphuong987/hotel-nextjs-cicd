@@ -16,20 +16,23 @@ Landing page Next.js đơn giản cho khách sạn **Change Hotel**, được th
 ```text
 change-hotel-demo/
 ├── src/
-│   ├── app/                 # Next.js routes, layout, global CSS
+│   ├── app/                 # Next.js routes, API, layout, global CSS
 │   ├── components/          # UI components và test gần component
-│   └── data/siteConfig.ts   # Text, CTA, liên hệ, hình ảnh, rooms, amenities
+│   ├── data/homeContent.json # Nội dung mặc định của trang chủ
+│   └── lib/siteContent.ts   # Đọc/ghi nội dung runtime
 ├── Dockerfile
 ├── docker-compose.yml
 ├── package.json
 └── README.md
 ```
 
-Muốn đổi nội dung landing page, sửa file:
+Muốn đổi text hoặc hình ảnh trên trang chủ, chạy app và mở:
 
 ```text
-src/data/siteConfig.ts
+http://localhost:3000/admin
 ```
+
+Form admin lưu dữ liệu qua API `PUT /api/home-content`. Khi chạy local, dữ liệu runtime được ghi vào `.data/homepage-content.json`. File `src/data/homeContent.json` chỉ là nội dung mặc định khi chưa có dữ liệu runtime.
 
 ## Chạy local
 
@@ -54,7 +57,7 @@ Các lệnh này phù hợp để đưa vào CI/CD pipeline.
 
 ```bash
 docker build -t change-hotel-demo:local .
-docker run --rm -p 3000:3000 change-hotel-demo:local
+docker run --rm -p 3000:3000 -v change-hotel-content:/app/.data change-hotel-demo:local
 ```
 
 ## Chạy bằng Docker Compose
@@ -103,8 +106,8 @@ docker build -t change-hotel-demo:ci .
 
 ## Bài tập DevOps dễ tạo
 
-- Tạo branch đổi text trong `src/data/siteConfig.ts`.
+- Tạo branch đổi text mặc định trong `src/data/homeContent.json`.
 - Tạo branch đổi style trong `src/app/globals.css`.
-- Tạo conflict bằng cách cùng sửa một room trong `siteConfig.ts`.
+- Tạo conflict bằng cách cùng sửa một room trong `homeContent.json`.
 - Thêm test mới cho CTA hoặc thông tin liên hệ.
 - Thêm GitHub Actions/GitLab CI chạy lint, test, build.
