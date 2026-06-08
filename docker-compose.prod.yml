@@ -13,6 +13,9 @@ services:
       - BUILD_ENV=production
     env_file:
       - .env.production
+    depends_on:
+      mysqldb:
+        condition: service_healthy
     labels:
       - "com.hotel.environment=production"
       - "com.hotel.managed-by=docker-compose"
@@ -23,6 +26,25 @@ services:
       retries: 3
       start_period: 30s
 
+  mysqldb:
+    image: mysql:8.4
+    container_name: hotel-prod-mysql
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+    volumes:
+      - mysql-prod-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 networks:
   default:
     name: hotel-prod-network
+
+volumes:
+  mysql-prod-data:

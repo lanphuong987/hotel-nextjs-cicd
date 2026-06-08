@@ -13,10 +13,32 @@ services:
       - BUILD_ENV=development
     env_file:
       - .env.development
+    depends_on:
+      mysqldb:
+        condition: service_healthy
     labels:
       - "com.hotel.environment=development"
       - "com.hotel.managed-by=docker-compose"
 
+  mysqldb:
+    image: mysql:8.4
+    container_name: hotel-dev-mysql
+    restart: unless-stopped
+    env_file:
+      - .env.development
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+    volumes:
+      - mysql-dev-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 networks:
   default:
     name: hotel-dev-network
+
+volumes:
+  mysql-dev-data:
