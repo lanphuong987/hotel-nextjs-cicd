@@ -14,7 +14,7 @@ export function LandingPage({ config }: LandingPageProps) {
             {config.hotelName}
           </a>
           <div className="navLinks">
-            <a href="#rooms">{config.navigation.rooms}</a>
+            <a href="/room">{config.navigation.rooms}</a>
             <a href="#amenities">{config.navigation.amenities}</a>
             <a href="#contact">{config.navigation.contact}</a>
           </div>
@@ -29,7 +29,7 @@ export function LandingPage({ config }: LandingPageProps) {
             <a className="button primary" href={`mailto:${config.contact.email}`}>
               {config.bookingCta}
             </a>
-            <a className="button secondary" href="#rooms">
+            <a className="button secondary" href="/room">
               {config.secondaryCta}
             </a>
           </div>
@@ -74,6 +74,9 @@ export function LandingPage({ config }: LandingPageProps) {
                   <span>{room.price}</span>
                 </div>
                 <p>{room.description}</p>
+                <a className="roomLink" href={room.url}>
+                  View room
+                </a>
               </div>
             </article>
           ))}
