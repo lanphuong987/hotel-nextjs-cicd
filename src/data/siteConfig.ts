@@ -9,7 +9,9 @@ export type Highlight = {
 export type Room = {
   name: string;
   price: string;
+  url: string;
   image: string;
+  images: string[];
   description: string;
 };
 
@@ -124,6 +126,77 @@ function readImage(source: JsonObject, key: string): string {
   return validateImage(value, key);
 }
 
+function readOptionalImageArray(
+  source: JsonObject,
+  key: string,
+  fallback: string[]
+): string[] {
+  const value = source[key];
+
+  if (value === undefined) {
+    return fallback;
+  }
+
+  if (!Array.isArray(value)) {
+    throw new Error(`Missing required list field: ${key}`);
+  }
+
+  const images = value.map((item, index) => {
+    if (typeof item !== "string" || item.trim() === "") {
+      throw new Error(`Invalid image item at ${key}.${index}`);
+    }
+
+    return validateImage(item.trim(), `${key}.${index}`);
+  });
+
+  return images.length > 0 ? images : fallback;
+}
+
+function readUrl(source: JsonObject, key: string): string {
+  const value = readString(source, key);
+
+  return validateUrl(value, key);
+}
+
+function readOptionalUrl(source: JsonObject, key: string, fallback: string): string {
+  const value = source[key];
+
+  if (value === undefined) {
+    return fallback;
+  }
+
+  if (typeof value !== "string" || value.trim() === "") {
+    throw new Error(`Invalid URL field: ${key}`);
+  }
+
+  return validateUrl(value.trim(), key);
+}
+
+function validateUrl(value: string, key: string): string {
+  if (value.startsWith("/") || value.startsWith("#") || value.startsWith("mailto:")) {
+    return value;
+  }
+
+  try {
+    const url = new URL(value);
+
+    if (url.protocol === "http:" || url.protocol === "https:") {
+      return value;
+    }
+  } catch {
+    throw new Error(`Invalid URL field: ${key}`);
+  }
+
+  throw new Error(`Invalid URL field: ${key}`);
+}
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
 function validateImage(value: string, key: string): string {
   if (value.startsWith("/")) {
     return value;
@@ -191,12 +264,20 @@ export function normalizeSiteConfig(value: unknown): SiteConfig {
       value: readString(item, "value"),
       detail: readString(item, "detail")
     })),
-    rooms: readObjectArray(value, "rooms", (item) => ({
-      name: readString(item, "name"),
-      price: readString(item, "price"),
-      image: readImage(item, "image"),
-      description: readString(item, "description")
-    })),
+    rooms: readObjectArray(value, "rooms", (item) => {
+      const name = readString(item, "name");
+      const image = readImage(item, "image");
+      const images = readOptionalImageArray(item, "images", [image]);
+
+      return {
+        name,
+        price: readString(item, "price"),
+        url: readOptionalUrl(item, "url", `/rooms/${slugify(name)}`),
+        image: images[0] ?? image,
+        images,
+        description: readString(item, "description")
+      };
+    }),
     amenities: readStringArray(value, "amenities"),
     gallery: readStringArray(value, "gallery").map((image, index) =>
       validateImage(image, `gallery.${index}`)

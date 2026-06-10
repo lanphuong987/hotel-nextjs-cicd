@@ -5,6 +5,7 @@ coverage
 .data
 .env
 .env*.local
+public/uploads
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
