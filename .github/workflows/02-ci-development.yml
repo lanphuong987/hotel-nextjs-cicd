@@ -10,6 +10,10 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - '.github/workflows/**'
+      - 'README.md'
+      - 'docs/**'
 
 env:
   IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
@@ -72,4 +76,66 @@ jobs:
           echo "Tags: ${{ steps.meta.outputs.tags }}"
           echo "Digest: ${{ steps.build.outputs.digest }}"
 
+        
+  # ----------------------------------------------------------
+  # JOB 2: Deploy lên Development Server
+  # ----------------------------------------------------------
+  deploy-development:
+    name: Deploy to Development Server
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    environment: development
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+ 
+            echo "Di chuyển vào thư mục project..."
+            cd /www/wwwroot/change_hotel/hotel-nextjs-cicd
+ 
+ 
+            echo "⬇Pull image dev-latest..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.IMAGE_NAME }}:dev-latest
+ 
+            echo "Khởi động lại container với image mới..."
+            docker compose -f docker-compose.dev.yml down --remove-orphans
+            docker compose -f docker-compose.dev.yml up -d
+ 
+            echo "Dọn dẹp images cũ..."
+            docker image prune -f
+ 
+            echo "Deploy development hoàn tất!"
+
+  # ----------------------------------------------------------
+  # JOB 3: Thông báo kết quả
+  # ----------------------------------------------------------
+  notify:
+    name: 📢 Notify Result
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-development]
+    if: always()
+    steps:
+      - name: Summary
+        run: |
+          echo "## 🚀 Development Deploy Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Step | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Build & Push | ${{ needs.build-and-push.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Deploy Dev | ${{ needs.deploy-development.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`main\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Triggered by:** @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "> QA test xong → Gắn tag \`v1.x.x\` để deploy Production" >> $GITHUB_STEP_SUMMARY
+
+
+  
       
