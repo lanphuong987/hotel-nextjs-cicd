@@ -93,6 +93,7 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
+          port: 2222
           script: |
             set -e
  
