@@ -1,5 +1,5 @@
 name: Docker Build & Push
-description: >
+description: 
   Builds a Docker image with full metadata labels, pushes to Docker Hub,
   and outputs the digest and tags. Uses GitHub Actions cache for speed.
 
@@ -11,10 +11,10 @@ inputs:
     description: 'Docker Hub access token'
     required: true
   image-name:
-    description: 'Docker image name (without registry prefix)'
+    description: 'Docker image name'
     required: true
   tags:
-    description: 'Newline-separated docker/metadata-action tag rules'
+    description: 'Metadata-action tag rules'
     required: true
   build-env:
     description: 'Build environment label: development | production'
@@ -27,13 +27,13 @@ inputs:
 
 outputs:
   digest:
-    description: 'Image digest (sha256:...)'
+    description: 'Image digest'
     value: ${{ steps.build.outputs.digest }}
   tags:
     description: 'Comma-separated list of full image tags pushed'
     value: ${{ steps.meta.outputs.tags }}
   primary-tag:
-    description: 'First tag in the list (most specific)'
+    description: 'First tag in the list'
     value: ${{ steps.primary.outputs.tag }}
 
 runs:
@@ -42,7 +42,6 @@ runs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
       with:
-        # BuildKit enables advanced caching and multi-platform builds
         driver-opts: image=moby/buildkit:latest
 
     - name: Log in to Docker Hub
@@ -71,7 +70,7 @@ runs:
         context: .
         push: true
         tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}=
+        labels: ${{ steps.meta.outputs.labels }}
         cache-from: type=gha,scope=${{ inputs.build-env }}
         cache-to: type=gha,mode=max,scope=${{ inputs.build-env }}
         provenance: false
