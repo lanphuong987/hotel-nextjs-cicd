@@ -1,0 +1,84 @@
+name: Notify Deploy Result
+description: >
+  Posts a deployment notification to GitHub Actions Job Summary.
+  On failure, opens a GitHub Issue 
+
+inputs:
+  status:
+    description: 'Deployment status: success | failure | cancelled'
+    required: true
+  environment:
+    description: 'Target environment: development | production'
+    required: true
+  version:
+    description: 'Version or image tag being deployed'
+    required: true
+  actor:
+    description: 'GitHub username who triggered the deploy'
+    required: true
+  run-url:
+    description: 'URL to the GitHub Actions run'
+    required: true
+  # Optional — populated on failure for rollback context
+  previous-version:
+    description: 'Previous version'
+    required: false
+    default: ''
+  github-token:
+    description: 'GitHub token for creating Issues on failure'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # ----------------------------------------------------------
+    # Write Job Summary 
+    # ----------------------------------------------------------
+    - name: Write Job Summary
+      shell: bash
+      run: |
+        STATUS="${{ inputs.status }}"
+        ENV="${{ inputs.environment }}"
+        VERSION="${{ inputs.version }}"
+        ACTOR="${{ inputs.actor }}"
+        RUN_URL="${{ inputs.run-url }}"
+        PREV="${{ inputs.previous-version }}"
+        TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
+
+        if [ "$STATUS" = "success" ]; then
+          ICON="✅"
+          HEADLINE="Deploy thành công"
+          COLOR="green"
+        elif [ "$STATUS" = "failure" ]; then
+          ICON="❌"
+          HEADLINE="Deploy thất bại"
+          COLOR="red"
+        else
+          ICON="⚠️"
+          HEADLINE="Deploy bị huỷ"
+          COLOR="yellow"
+        fi
+
+        cat >> $GITHUB_STEP_SUMMARY << EOF
+        ## $ICON Deployment $HEADLINE
+
+        | Thông tin | Giá trị |
+        |-----------|---------|
+        | - Environment | \`$ENV\` |
+        | - Version | \`$VERSION\` |
+        | - Triggered by | @$ACTOR |
+        | - Thời gian | $TIMESTAMP |
+        | - Run | [$RUN_URL]($RUN_URL) |
+        EOF
+
+        if [ -n "$PREV" ]; then
+          echo "| ↩️ Previous version | \`$PREV\` |" >> $GITHUB_STEP_SUMMARY
+        fi
+
+        if [ "$STATUS" = "failure" ]; then
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+
+        ---
+        > ⚠️ **Action required:** Kiểm tra logs tại link.Xem hướng dẫn trong issue nếu cần rollback.
+        EOF
+        fi
