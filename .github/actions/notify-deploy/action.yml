@@ -68,7 +68,7 @@ runs:
         | - Version | \`$VERSION\` |
         | - Triggered by | @$ACTOR |
         | - Thời gian | $TIMESTAMP |
-        | - Run | [$RUN_URL]($RUN_URL) |
+        |  Run | [$RUN_URL]($RUN_URL) |
         EOF
 
         if [ -n "$PREV" ]; then
@@ -79,6 +79,86 @@ runs:
           cat >> $GITHUB_STEP_SUMMARY << EOF
 
         ---
-        > ⚠️ **Action required:** Kiểm tra logs tại link.Xem hướng dẫn trong issue nếu cần rollback.
+        > ⚠️ **Action required:** Kiểm tra logs tại link. Xem hướng dẫn nếu cần rollback
         EOF
         fi
+   # ----------------------------------------------------------
+    # Step 2: Telegram — PRODUCTION FAIL only
+    # ----------------------------------------------------------
+    - name: Telegram — Production Failure Alert
+      if: inputs.status == 'failure' && inputs.environment == 'production'
+      uses: appleboy/telegram-action@v1.0.0
+      with:
+        token: ${{ inputs.telegram-token }}
+        to: ${{ inputs.telegram-chat-id }}
+        format: markdown
+        disable_web_page_preview: true
+        message: |
+          🚨 *Production Deploy FAILED*
+ 
+          *Version:* `${{ inputs.version }}`
+          *Triggered by:* @${{ inputs.actor }}
+ 
+          ${{ inputs.previous-version != '' && format('↩️ Auto\-rollback target: `{0}`', inputs.previous-version) || '⚠️ No previous version for rollback' }}
+ 
+          [View failed run](${{ inputs.run-url }})
+          GitHub Issue đã được tạo tự động trong repo\.
+
+    # ----------------------------------------------------------
+    # Step 4: GitHub Issue — PRODUCTION FAIL only
+    # ----------------------------------------------------------
+    - name: GitHub Issue — Production Failure Only
+      if: inputs.status == 'failure' && inputs.environment == 'production'
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const version  = '${{ inputs.version }}';
+          const actor    = '${{ inputs.actor }}';
+          const runUrl   = '${{ inputs.run-url }}';
+          const prev     = '${{ inputs.previous-version }}';
+          const timestamp = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+ 
+          const rollbackSection = prev ? `
+          ## ↩️ Rollback Instructions
+          \`\`\`bash
+          cd /www/wwwroot/change_hotel/hotel-nextjs-cicd
+          sed -i "s/IMAGE_TAG=.*/IMAGE_TAG=${prev}/" .env.production
+          docker compose -f docker-compose.prod.yml down
+          docker compose -f docker-compose.prod.yml up -d
+          \`\`\`
+          Hoặc re-trigger workflow với tag \`${prev}\`.` : '';
+ 
+          const { data: issue } = await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo:  context.repo.repo,
+            title: `🚨 [PRODUCTION] Deploy failed: v${version}`,
+            labels: ['bug', 'deploy-failure', 'production'],
+            body: `## ❌ Production Deploy Failed — v${version}
+ 
+          | | |
+          |---|---|
+          | **Time** | ${timestamp} |
+          | **Version** | \`${version}\` |
+          | **Triggered by** | @${actor} |
+          | **Run** | ${runUrl} |
+          ${prev ? `| **Rollback target** | \`${prev}\` |` : ''}
+ 
+          ## 📋 Incident Checklist
+          - [ ] Check logs in the Actions run (link above)
+          - [ ] Identify failure stage: build / SSH connect / health check / rollback
+          - [ ] Confirm whether auto-rollback succeeded (check server)
+          - [ ] Fix root cause or perform manual rollback if needed
+          - [ ] Re-deploy or push hotfix
+          - [ ] Close this issue once resolved
+          ${rollbackSection}
+ 
+          ---
+          *Auto-created by CI/CD pipeline. Close when resolved.*`,
+          });
+ 
+          console.log(`✅ Issue created: ${issue.html_url}`);
+ 
+          await core.summary
+            .addRaw(`\n> 🚨 **Issue created:** [${issue.title}](${issue.html_url})\n`)
+            .write();
