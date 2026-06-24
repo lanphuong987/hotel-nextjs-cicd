@@ -86,5 +86,5 @@ runs:
         # Lấy tag đầu tiên trong danh sách (specific nhất)
         FIRST_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n1)
         echo "tag=$FIRST_TAG" >> $GITHUB_OUTPUT
-        echo "📦 Primary tag: $FIRST_TAG"
-        echo "🔑 Digest: ${{ steps.build.outputs.digest }}"
+        echo "Primary tag: $FIRST_TAG"
+        echo "Digest: ${{ steps.build.outputs.digest }}"

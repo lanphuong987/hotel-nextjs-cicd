@@ -1,0 +1,106 @@
+name: 🏥 SSH Health Check
+description: >
+  SSH into the server and verifies the container is running and healthy.
+
+inputs:
+  host:
+    description: 'Server IP'
+    required: true
+  ssh-key:
+    description: 'SSH key'
+    required: true
+  container-name:
+    description: 'Docker container name to check'
+    required: true
+  compose-file:
+    description: 'docker-compose file path (for log retrieval on failure)'
+    required: false
+    default: ''
+  max-retries:
+    description: 'Max retry attempts'
+    required: false
+    default: '6'
+  retry-interval:
+    description: 'Seconds between retries'
+    required: false
+    default: '10'
+  initial-wait:
+    description: 'Seconds to wait before first check (container startup time)'
+    required: false
+    default: '15'
+
+outputs:
+  healthy:
+    description: '"true" if container is healthy, "false" otherwise'
+    value: ${{ steps.check.outputs.healthy }}
+
+runs:
+  using: composite
+  steps:
+    - name: Health check with retry
+      id: check
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ inputs.host }}
+        username: root
+        key: ${{ inputs.ssh-key }}
+        # Increase timeout for slow container starts
+        connect_timeout: 30s
+        command_timeout: 120s
+        script: |
+          CONTAINER="${{ inputs.container-name }}"
+          MAX_RETRIES="${{ inputs.max-retries }}"
+          INTERVAL="${{ inputs.retry-interval }}"
+          INITIAL_WAIT="${{ inputs.initial-wait }}"
+          COMPOSE_FILE="${{ inputs.compose-file }}"
+
+          echo "Chờ $INITIAL_WAIT giây cho container khởi động..."
+          sleep $INITIAL_WAIT
+
+          RETRY=0
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            RETRY=$((RETRY + 1))
+            echo "🔍 Health check lần $RETRY/$MAX_RETRIES..."
+
+            # Kiểm tra container running
+            if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER}$"; then
+              echo "Container '$CONTAINER' chưa thấy trong docker ps..."
+            else
+              # Kiểm tra health status nếu có HEALTHCHECK trong Dockerfile
+              HEALTH=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER" 2>/dev/null || echo "no-healthcheck")
+
+              if [ "$HEALTH" = "no-healthcheck" ] || [ "$HEALTH" = "healthy" ]; then
+                echo "✅ Container '$CONTAINER' đang chạy!"
+                echo "Container info:"
+                docker ps --filter "name=$CONTAINER" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+                exit 0
+              elif [ "$HEALTH" = "starting" ]; then
+                echo "Container đang khởi động (health: starting)..."
+              else
+                echo "❌ Container health status: $HEALTH"
+              fi
+            fi
+
+            if [ $RETRY -lt $MAX_RETRIES ]; then
+              echo "↻  Thử lại sau ${INTERVAL}s..."
+              sleep $INTERVAL
+            fi
+          done
+
+          # Thất bại: dump logs để debug
+          echo ""
+          echo "❌ Health check thất bại sau $MAX_RETRIES lần thử!"
+          echo ""
+          echo "=== Container status ==="
+          docker ps -a --filter "name=$CONTAINER"
+          echo ""
+          echo "=== Container logs (50 dòng cuối) ==="
+          docker logs --tail 50 "$CONTAINER" 2>&1 || true
+
+          if [ -n "$COMPOSE_FILE" ] && [ -f "$COMPOSE_FILE" ]; then
+            echo ""
+            echo "=== Docker Compose logs ==="
+            docker compose -f "$COMPOSE_FILE" logs --tail 30 2>&1 || true
+          fi
+
+          exit 1
