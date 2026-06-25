@@ -44,8 +44,6 @@ runs:
         host: ${{ inputs.host }}
         username: root
         key: ${{ inputs.ssh-key }}
-        # Increase timeout for slow container starts
-        connect_timeout: 30s
         command_timeout: 120s
         script: |
           CONTAINER="${{ inputs.container-name }}"
